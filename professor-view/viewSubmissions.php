@@ -190,11 +190,15 @@ $resetUrl = $_SERVER['PHP_SELF'] . '?' . http_build_query($queryParams);
                                     </td>
                                     <?php elseif ($submission['approval_type'] == "Approved"): ?>
                                     <td>
-                                        <p>HI</p>
+                                        <div class="approvalArea">
+                                            <div class="approved">Approved</div>
+                                        </div>
                                     </td>
                                     <?php elseif ($submission['approval_type'] == "Denied"): ?>
                                     <td>
-                                        <img src="Screenshot 2024-12-18 213413.png" alt="">
+                                        <div class="approvalArea">
+                                            <div class="disapproved">Denied</div>
+                                        </div>
                                     </td>
                                     <?php endif; ?>  
                                 </tr>

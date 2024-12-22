@@ -334,20 +334,6 @@ li {
        margin-right: 8px;
        flex-grow: 1;
    }
-   .approvalArea{
-       justify-content: space-between;
-   }
-   .approved{
-       color: white;
-       background-color: #05ba62;
-       margin-top: 7px;
-       border: 2px solid #0a6d3d;
-       padding: 5px;
-       border-radius: 50px;
-       font-size: 0.75rem;
-       justify-content: center;
-       text-align: center;
-   }
    .subject-area .fa-caret-right{
        font-size: 1.75rem;
        margin-right: 10px;
@@ -458,3 +444,28 @@ li {
        max-width: 1300px;
        margin-top: 15px;
    }
+   .approvalArea{
+    justify-content: space-between;
+    }
+    .approved{
+        color: white;
+        background-color: #05ba62;
+        margin-top: 7px;
+        border: 2px solid #0a6d3d;
+        padding: 5px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        justify-content: center;
+        text-align: center;
+    }
+    .disapproved{
+    color: white;
+    background-color: #eb0909;
+    margin-top: 7px;
+    border: 2px solid #890e0e;
+    padding: 5px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    justify-content: center;
+    text-align: center;
+    }

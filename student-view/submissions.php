@@ -135,7 +135,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </tr>
             </thead>
             <?php foreach ($submissions as $submission): 
-            if($submission['prof_awknowledge'] == "Approved" || $submission['prof_awknowledge'] == "Denied"):
+            if($submission['prof_awknowledge'] == "Approved" || $submission['prof_awknowledge'] == "Denied" || $submission['approval_adviser'] == "Denied" || $submission['approval_guidance'] == "Denied"):
             ?>
             <tbody>
                <?php
@@ -156,11 +156,15 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                            </td>
                         <?php if ($submission['prof_awknowledge'] == "Approved"): ?>
                             <td>
-                                <p>HI</p>
+                                <div class="approvalArea">
+                                    <div class="approved">Approved</div>
+                                </div>
                             </td>
-                            <?php elseif ($submission['prof_awknowledge'] == "Denied"): ?>
+                            <?php elseif ($submission['prof_awknowledge'] == "Denied" || $submission['approval_adviser'] == "Denied" || $submission['approval_guidance'] == "Denied"): ?>
                             <td>
-                                <p>Hello</p>
+                                <div class="approvalArea">
+                                    <div class="disapproved">Denied</div>
+                                </div>
                             </td>
                         <?php endif; ?>  
                        </tr>

@@ -423,3 +423,28 @@ li {
        color: #FF2400;
        background: none;
    }
+    .approvalArea{
+    justify-content: space-between;
+    }
+    .approved{
+        color: white;
+        background-color: #05ba62;
+        margin-top: 7px;
+        border: 2px solid #0a6d3d;
+        padding: 5px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        justify-content: center;
+        text-align: center;
+    }
+    .disapproved{
+    color: white;
+    background-color: #eb0909;
+    margin-top: 7px;
+    border: 2px solid #890e0e;
+    padding: 5px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    justify-content: center;
+    text-align: center;
+    }

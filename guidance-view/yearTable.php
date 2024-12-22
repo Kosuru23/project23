@@ -102,12 +102,11 @@ $resetUrl = $_SERVER['PHP_SELF'] . '?' . http_build_query($queryParams);
 
         <!-- HEADER -->
         <div class="user-p-cont">
-            <div class="subject-container">
                 <a class="year-level"><?php echo htmlspecialchars($year); ?> Year</a>
                 <a class="subject-title"><?php echo htmlspecialchars($subject); ?></a>
-            </div>
 
             <!-- SEARCH AND FILTER FORM -->
+        <div class="subject-container">
             <div class="filter-searching">
                 <form method="POST" class="row mb-3">
                     <div class="col-md-6">
@@ -187,11 +186,15 @@ $resetUrl = $_SERVER['PHP_SELF'] . '?' . http_build_query($queryParams);
                                         </td>
                                         <?php elseif ($submission['approval'] == "Approved"): ?>
                                         <td>
-                                            <p>HI</p>
+                                            <div class="approvalArea">
+                                                <div class="approved">Approved</div>
+                                            </div>
                                         </td>
                                         <?php elseif ($submission['approval'] == "Denied"): ?>
                                         <td>
-                                            <img src="Screenshot 2024-12-18 213413.png" alt="">
+                                            <div class="approvalArea">
+                                                <div class="disapproved">Denied</div>
+                                            </div>
                                         </td>
                                     <?php endif; ?>  
                                     </tr>

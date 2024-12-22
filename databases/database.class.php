@@ -214,13 +214,14 @@ class user {
     // }
 
     function excuse_letters($id) {
-        $sql = "SELECT DISTINCT CONCAT(last_name, ', ', first_name, IFNULL(CONCAT(' ', middle_name), '')) AS professors_name, acronym, date_absent, date_submitted, comment, type, excuse_letter, professors.ID as prof_id, reason.id as reason_id, prof_awknowledge
+        $sql = "SELECT DISTINCT CONCAT(last_name, ', ', first_name, IFNULL(CONCAT(' ', middle_name), '')) AS professors_name, acronym, date_absent, date_submitted, comment, type, excuse_letter, professors.ID as prof_id, reason.id as reason_id, prof_awknowledge, approval.approved_adviser AS approval_adviser, approval.approved_guidance AS approval_guidance
         FROM excuse_letter 
         LEFT JOIN subject ON excuse_letter.subject_id = subject.id 
         LEFT JOIN reason ON excuse_letter.reason_id = reason.id
         LEFT JOIN student ON excuse_letter.student_id = student.student_id
         LEFT JOIN professors ON excuse_letter.prof_id = professors.ID
         LEFT JOIN users ON professors.user_id = users.ids
+        LEFT JOIN approval ON approval.excuse_letter_id = excuse_letter.id
         WHERE (student.user_id = :user_id) AND (professors.ID = excuse_letter.prof_id)";
         
         $query = $this->pdo->prepare($sql);

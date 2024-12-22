@@ -52,9 +52,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $user->get_stud($username);
                 header('location: ../student-view/test.php');
                 break;
+            case 'Adviser':
+                $faculty->get_adviser($username);
+                header('Location: ../adviser-view/adviser.php');
+                break;
             case 'Professor':
                 $faculty->get_prof($username);
                 header('Location: ../professor-view/professors.php');
+                break;
+            case 'Guidance':
+                $faculty->get_guidance($username);
+                header('Location: ../guidance-view/faculty.php');
+                break;
+            default:
+                $loginErr = 'Invalid user type.';
                 break;
         }
     }
