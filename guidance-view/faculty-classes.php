@@ -9,7 +9,7 @@ if (!isset($_SESSION['account'])) {
     switch ($_SESSION['account']['user_type']) {
         case 'Guidance':
             $faculty->get_guidance($username);
-            header('Location: ../professor-view/faculty.php');
+            header('Location: ../guidance-view/faculty.php');
             break;
     }
 }

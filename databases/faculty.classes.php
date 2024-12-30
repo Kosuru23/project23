@@ -143,7 +143,7 @@ class faculty {
         LEFT JOIN excuse_letter ON excuse_letter.student_id = student.student_id
         LEFT JOIN subject ON excuse_letter.subject_id = subject.id 
         LEFT JOIN approval ON excuse_letter.id = approval.excuse_letter_id
-        WHERE department.name LIKE :name
+        WHERE (department.name LIKE :name) AND (approval.approved_guidance = 'Pending')
         GROUP BY program.year_level
         ORDER BY program.year_level ASC";
 
@@ -162,7 +162,7 @@ class faculty {
         LEFT JOIN excuse_letter ON subject.id = excuse_letter.subject_id AND excuse_letter.prof_id = :prof_id
         LEFT JOIN department ON subject.department_id = department.id
         LEFT JOIN approval ON excuse_letter.id = approval.excuse_letter_id
-        WHERE (subject.department_id = :id) AND (approval.approved_guidance = 'Approved')
+        WHERE (subject.department_id = :id) AND (approval.approved_guidance = 'Approved') AND (excuse_letter.prof_awknowledge = 'Pending')
         GROUP BY subject.id, subject.name, acronym 
         ORDER BY total DESC";
 
@@ -177,7 +177,35 @@ class faculty {
         return $data;
     }
     
-    function get_excuse_letters($subject, $prof_id) {
+    function get_program($department_id = null, $year_level = null) {
+        $data = [];
+
+        if($_SESSION['user_type'] === 'Adviser') {
+            $sql = "SELECT name FROM program WHERE (department_id = :department_id) AND (year_level = :year_level)";
+
+            $query = $this->pdo->prepare($sql);
+            $query->bindParam(":department_id", $department_id); 
+            $query->bindParam(":year_level", $year_level); 
+
+            if($query->execute()) {
+                $data = $query->fetchAll();
+            }
+        }
+
+        if($_SESSION['user_type'] === 'Professor') {
+            $sql = "SELECT * FROM program ORDER BY program.name ASC";
+
+            $query = $this->pdo->prepare($sql);
+
+            if ($query->execute()) {
+                $data = $query->fetchAll();
+            }
+        }
+
+        return $data;
+    }
+    
+    function get_excuse_letters($subject, $prof_id, $search= null, $filter = null) {
         $sql = "SELECT DISTINCT CONCAT(last_name, ', ', first_name, IFNULL(CONCAT(' ', middle_name), '')) AS name, date_submitted, date_absent, comment, program.name as course, reason.type, excuse_letter, excuse_letter.id as id, excuse_letter.prof_awknowledge as approval_type, excuse_letter.approval_date as prof_approved_date
         FROM excuse_letter 
         LEFT JOIN subject ON excuse_letter.subject_id = subject.id
@@ -187,10 +215,28 @@ class faculty {
         LEFT JOIN users ON student.user_id = users.ids
         LEFT JOIN approval ON excuse_letter.id = approval.excuse_letter_id
         WHERE (subject.name = :subject_name) AND (excuse_letter.prof_id = :prof_id) AND (approval.approved_guidance = 'Approved')";
+        
+        if(!empty($search)) {
+            $sql .="AND (CONCAT(last_name, ', ', first_name, IFNULL(CONCAT(' ', middle_name), '')) LIKE :search) ";
+        }
+
+        if(!empty($filter)) {
+            $sql .="AND (program.name LIKE :filter) ";
+        }        
 
         $query = $this->pdo->prepare($sql);
         $query->bindParam(":subject_name", $subject); 
         $query->bindParam(":prof_id", $prof_id); 
+
+        if (!empty($search)) {
+            $search = "%$search%";
+            $query->bindParam(":search", $search);
+        }
+
+        if (!empty($filter)) {
+            $query->bindParam(":filter", $filter);
+        }
+        
         $data = null;
 
         if($query->execute()) {
@@ -199,7 +245,7 @@ class faculty {
         return $data;
     }
 
-    function get_adviser_excuse_letter($department_id){
+    function get_adviser_excuse_letter($department_id, $search = null, $filter = null){
         $sql = "SELECT DISTINCT excuse_letter.id AS id, CONCAT(stud_user.last_name, ', ', stud_user.first_name, IFNULL(CONCAT(' ', stud_user.middle_name), '')) AS student_name, program.name, CONCAT(prof_user.last_name, ', ', prof_user.first_name, IFNULL(CONCAT(' ', prof_user.middle_name), '')) AS professor_name, 
         date_absent, date_submitted, comment, reason.type, excuse_letter, subject.name AS subject_name, approval.approved_adviser as approval, approval.date_adviser_approved as date_approved, approval.id as approval_id
         FROM excuse_letter
@@ -213,12 +259,29 @@ class faculty {
         JOIN adviser ON program.year_level = adviser.year_level
         JOIN department ON program.department_id = department.id
         JOIN approval ON approval.excuse_letter_id = excuse_letter.id
-        WHERE (department.id = :department_id) AND (program.year_level = adviser.year_level)";
+        WHERE (department.id = :department_id) AND (program.year_level = adviser.year_level) ";
+
+        if(!empty($search)) {
+            $sql .="AND (CONCAT(stud_user.last_name, ', ', stud_user.first_name, IFNULL(CONCAT(' ', stud_user.middle_name), '')) LIKE :search) ";
+        }
+
+        if(!empty($filter)) {
+            $sql .="AND (program.name LIKE :filter) ";
+        }
 
         $query = $this->pdo->prepare($sql);
 
         $query->bindParam(":department_id", $department_id); 
 
+        if (!empty($search)) {
+            $search = "%$search%";
+            $query->bindParam(":search", $search);
+        }
+
+        if (!empty($filter)) {
+            $query->bindParam(":filter", $filter);
+        }
+        
         $data = null;
 
         if($query->execute()) {

@@ -1,0 +1,192 @@
+html {
+       scrollbar-color: #ffffff #8a1e1e;
+     }
+     body {
+            font-family: "Poppins", sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            place-items: center;  
+            min-height: 100vh;
+            background-image: url('/nexuse/images/SCHOOL2.png'); 
+            background-size: cover;
+            background-position: center; 
+            background-repeat: no-repeat;
+         }
+     
+         /* body::-webkit-scrollbar-track {
+           background-color: transparent; /* Track color */
+          
+          .container {
+            position: relative;
+            width: 450px;
+            margin: 70px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 50);
+            z-index: 1;
+          }
+          
+          .logo {
+           position: absolute;
+           top: -40px; 
+           left: -40px;
+           width: 100px; 
+           height: 100px;
+     
+       }
+       
+       .logo img {
+           width: 100%;
+           height: 100%;
+           object-fit: contain;
+       }
+       .cat{
+         background: radial-gradient(circle at 10% 20%, rgb(212, 13, 13) 0%, rgb(125, 19, 19) 100%);
+         border-radius: 50%;
+         border: 5px white solid;
+         padding: 20px;
+         margin: -10px;
+         perspective: 1000px;
+         transition: transform 0.3s;
+         transform-style: preserve-3d;
+         z-index: 2;
+     
+       }
+       .cat:hover{
+         transform: rotateY(180deg);
+       }
+          
+          h1 {
+            text-align: center;
+            justify-content: center;
+            font-size: 2.25rem;
+            margin-bottom: 20px;
+            color: #A10808;
+            font-family: "Josefin Sans";
+          }
+          input::placeholder {
+              font-style: italic;
+          }
+          input::-webkit-input-placeholder {
+              font-style: italic; 
+          }
+          .form-row {
+              display: flex;
+              justify-content: space-between;
+              gap: 10px; 
+          }
+          .form-col {
+              flex: 1; /* Make both columns the same width */
+          }
+          .form-group {
+            margin-bottom: 20px;
+          }
+          .form-group #name, .form-group #mname, .form-group #lname, .form-group #email{
+            width: 220px;
+          }
+          input[type="file"] {
+              border: 1px solid rgb(230, 230, 230);
+              border-radius: 3px;
+              background-color: transparent;
+              font-size: 1rem;
+              font-family: 'Poppins';
+              box-shadow: none;
+              padding: 3px;
+              margin-bottom: 10px;
+          }
+          
+          .form-group #password {
+           margin-bottom: 15px;
+          }
+          
+          label {
+            display: block;
+            margin-bottom: 5px;
+          }
+          
+          input {
+            width: 100%;
+            padding: 15px;
+            background-color: #efeeee ;
+            border: 1px solid rgb(119, 119, 119);
+            border-radius: 3px;
+            box-sizing: border-box;
+          }
+
+          input:focus {
+           color: black; 
+           border-color: #A10808; 
+           outline: none;
+       }
+          
+          .req {
+           font-family: "Poppins", sans-serif;
+            width: 100%;
+            padding: 17px;
+            background-color: #C32727;
+            color: white;
+            border: none;
+            font-size: 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+          }
+          .return{
+              color: #C32727;
+              font-size: 18px;
+              float: right;
+              font-weight: 600;
+              justify-content: space-between;
+              cursor: pointer;
+              border: none;
+              background-color: transparent;
+          }
+          .return i{
+              margin-right: 5px;
+          }
+          
+          .links {
+            text-align: center;
+            margin-top: 20px;
+          }
+          
+          .links a {
+            color: #333;
+            margin: 0 10px;
+            font-size: 15px;
+            top: 12px;
+          }
+     
+          .links #create_account {
+           position: relative;
+           text-decoration: none;
+           right: 50px;
+          }
+     
+          .links #forgot_password {
+           color: #A10808;
+           position: relative;
+           left: 50px;
+          }
+     
+          .links #forgot_password:hover {
+           color: #dd0b0b;
+          }
+     
+          .links #create_account:hover {
+           color: #5d5d5d;
+          }
+     
+          .req:hover {
+           background-color: #dd1a1a;
+           box-shadow: 0 4px 10px rgba(255, 0, 0, 0.2);
+          }
+          .return:hover {
+              color: #f61313;
+             }
+     
+          

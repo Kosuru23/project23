@@ -384,8 +384,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         });
     });
 
-
-
         const form = document.getElementById('editSubmissionForm');
         form.addEventListener('submit', function (event) {
             // event.preventDefault();

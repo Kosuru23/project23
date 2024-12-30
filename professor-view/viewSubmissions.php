@@ -7,15 +7,19 @@ require_once '../databases/connect.php';
 require_once '../databases/database.class.php';
 require_once '../databases/faculty.classes.php';
 
-
+$db = new Database();
+$user = new faculty($db);
 $subject = isset($_GET['subject']) ? $_GET['subject'] : null;
-$search = isset($_POST['search']) ? trim($_POST['search']) : '';
-$filterCourse = isset($_POST['filterCourse']) ? $_POST['filterCourse'] : '';
-$filterSubject = isset($_GET['filterSubject']) ? trim($_GET['filterSubject']) : '';
+$search = null;
+$prof_id = $_SESSION['ID'];
+$submissions = $user->get_excuse_letters($subject, $prof_id);  
+$sections = $user->get_program();
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $search = clean_input(($_POST['search']));
+    $filter = clean_input(($_POST['filter']));
 
-$queryParams = $_GET;
-unset($queryParams['search']); // Remove 'search' parameter
-$resetUrl = $_SERVER['PHP_SELF'] . '?' . http_build_query($queryParams);
+    $submissions = $user->get_excuse_letters($subject, $prof_id, $search, $filter);  
+}
 
 ?>
 
@@ -91,25 +95,28 @@ $resetUrl = $_SERVER['PHP_SELF'] . '?' . http_build_query($queryParams);
         <!-- HEADER -->
         <div class="user-p-cont">
             <div class="subject-container">
-                <a class="subject-title"><?php echo htmlspecialchars($subject); ?></a>
+                <a class="subject-title"><?php echo clean_input($subject); ?></a>
             </div>
 
             <!-- SEARCH AND FILTER FORM -->
             <div class="filter-searching">
                 <form method="POST" class="row mb-3">
                     <div class="col-md-6">
-                        <input type="text" name="search" class="form-control" placeholder="Search by Name..." value="<?php echo htmlspecialchars($search); ?>">
+                        <input type="text" name="search" class="form-control" placeholder="Search by Name..." value="<?php echo clean_input($search); ?>">
                     </div>
                     <div class="col-md-3">
-                        <select name="filterCourse" class="form-select">
+                        <select name="filter" class="form-select">
                             <option value="">Filter by Course</option>
-                            <option value="BSCS-2" <?php echo $filterCourse === 'BSCS-2' ? 'selected' : ''; ?>>BSCS-2</option>
-                            <option value="BSIT-2" <?php echo $filterCourse === 'BSIT-2' ? 'selected' : ''; ?>>BSIT-2</option>
+                            <?php foreach ($sections as $section): ?>
+                                <option value="<?= clean_input($section['name']) ?>" <?= isset($_POST['filter']) && clean_input($_POST['filter']) === $section['name'] ? 'selected' : '' ?>>
+                                    <?= clean_input($section['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="col-md-3">
                         <button type="submit" class="btn btn-danger" >Search</button>
-                        <a href="<?= htmlspecialchars($resetUrl) ?>" class="btn btn-secondary">Reset</a>
+                        <a href="" class="btn btn-secondary">Reset</a>
                     </div>
                 </form>
 
@@ -128,81 +135,70 @@ $resetUrl = $_SERVER['PHP_SELF'] . '?' . http_build_query($queryParams);
                         </tr>
                     </thead>
                     <tbody>
-                        <?php
-                            $db = new Database();
-                            $user = new faculty($db);
-                            $prof_id = $_SESSION['ID'];
-                            $submissions = $user->get_excuse_letters($subject, $prof_id);
-                        
-                            // // Eme eme lang to neil
-                            // $resetUrl = $_SERVER['PHP_SELF'];
-                            // if (!empty($queryParams)) {
-                            //     $resetUrl .= '?' . http_build_query($queryParams);
-                            // }
-                            // $filterCourse = $_POST['filterCourse'] ?? '';
-                            // $filterSubject = isset($_GET['filterSubject']) ? trim($_GET['filterSubject']) : ''; 
+                    <?php
+                    // Filter submissions based on expiry date condition and pending status
+                    $filtered_submissions = array_filter($submissions, function ($submission) {
+                        $login_date = DateTime::createFromFormat('Y-m-d H:i:s', $_SESSION['login']);
 
-                            // $filteredSubmissions = array_filter($submissions, function ($submission) use ($search, $filterSubject, $filterCourse) {
-                            //     $matchesSearch = empty($search) || stripos($submission['name'], $search) !== false;
-                            //     $matchesCourse = empty($filterCourse) || $submission['course'] === $filterCourse;
+                        // Check for pending submissions
+                        if (empty($submission['prof_approved_date']) && $submission['approval_type'] === 'Pending') {
+                            return true;
+                        }
 
-                            //     return $matchesSearch && $matchesCourse;
-                            // });
-                            // ?>
+                        // Check for approved submissions within expiry date
+                        if (!empty($submission['prof_approved_date'])) {
+                            $date_approved = DateTime::createFromFormat('Y-m-d H:i:s', $submission['prof_approved_date']);
+                            if ($date_approved !== false) {
+                                $expiry_date = clone $date_approved;
+                                $expiry_date->modify('+7 days');
+                                return $login_date <= $expiry_date;
+                            }
+                        }
 
-                        <?php if (empty($submissions)): ?>
+                        return false;
+                    });
+
+                    if (empty($filtered_submissions)): ?>
+                        <tr>
+                            <td colspan="8" class="text-ewan">No submissions found.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($filtered_submissions as $submission): ?>
                             <tr>
-                                <td colspan="8" class="text-ewan">No submissions found.</td>
+                                <td style="font-weight: 600; color: #C70039;"><?= $submission['name'] ?></td>
+                                <td><?= clean_input($submission['course']) ?></td>
+                                <td><?= clean_input($submission['date_absent']) ?></td>
+                                <td><?= clean_input($submission['date_submitted']) ?></td>
+                                <td class="scrollable-cell"><?= clean_input($submission['comment']) ?></td>
+                                <td><?= clean_input($submission['type']) ?></td>
+                                <td>
+                                    <img src="<?= $submission['excuse_letter'] ?>" alt="Photo" class="img-thumbnail photo-thumbnail" style="width:60px; cursor:pointer;" data-bs-toggle="modal" data-bs-target="#photoModal" data-photo="<?= $submission['excuse_letter'] ?>">
+                                </td>
+                                <?php if ($submission['approval_type'] == "Pending"): ?>
+                                <td>
+                                    <div class="approvalButtons">
+                                        <button class="yesApp-button" data-bs-toggle="modal" data-bs-target="#approvalButtons" data-action="approve" data-name="<?= $submission['name'] ?>" data-course="<?= $submission['course'] ?>" data-date-absent="<?= $submission['date_absent'] ?>" data-remarks="<?= $submission['comment'] ?>" data-id="<?= $submission['id'] ?>">
+                                            <i class="fa-solid fa-check"></i>
+                                        </button>
+                                        <button class="notApp-button" data-bs-toggle="modal" data-bs-target="#approvalButtons" data-action="decline" data-name="<?= $submission['name'] ?>" data-course="<?= $submission['course'] ?>" data-date-absent="<?= $submission['date_absent'] ?>" data-remarks="<?= $submission['comment'] ?>" data-id="<?= $submission['id'] ?>">
+                                            <i class="fa-solid fa-x"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                                <?php elseif ($submission['approval_type'] == "Approved"): ?>
+                                <td>
+                                    <div class="approvalArea">
+                                        <div class="approved">Approved</div>
+                                    </div>
+                                </td>
+                                <?php elseif ($submission['approval_type'] == "Denied"): ?>
+                                <td>
+                                    <div class="approvalArea">
+                                        <div class="disapproved">Denied</div>
+                                    </div>
+                                </td>
+                                <?php endif; ?>
                             </tr>
-                        <?php else: ?>
-                            <?php foreach ($submissions as $submission): 
-                                $expiry_date = null;
-                                if (!empty($submission['prof_approved_date'])) {
-                                    $date_approved = DateTime::createFromFormat('Y-m-d H:i:s', $submission['prof_approved_date']);
-                                    if ($date_approved !== false) {
-                                        $expiry_date = clone $date_approved;
-                                        $expiry_date->modify('+7 days');
-                                    }
-                                    $login_date = DateTime::createFromFormat('Y-m-d H:i:s', $_SESSION['login']);
-                                }
-                                ?>
-                                <?php if ($expiry_date === null || $login_date <= $expiry_date): ?>
-                                <tr>
-                                    <td style="font-weight: 600; color: #C70039;"><?= $submission['name'] ?></td>
-                                    <td><?= $submission['course'] ?></td>
-                                    <td><?= $submission['date_absent'] ?></td>
-                                    <td><?= $submission['date_submitted'] ?></td>
-                                    <td class="scrollable-cell"><?= htmlspecialchars($submission['comment']) ?></td>
-                                    <td><?= $submission['type'] ?></td>
-                                    <td>
-                                        <img src="<?= $submission['excuse_letter'] ?>" alt="Photo" class="img-thumbnail photo-thumbnail" style="width:60px; cursor:pointer;" data-bs-toggle="modal" data-bs-target="#photoModal" data-photo="<?= $submission['excuse_letter'] ?>">
-                                    </td>
-                                    <?php if($submission['approval_type'] == "Pending"): ?>
-                                    <td>
-                                      <div class="approvalButtons">
-                                      <button class="yesApp-button" data-bs-toggle="modal" data-bs-target="#approvalButtons" data-action="approve" data-name="<?=$submission['name']?>" data-course="<?= $submission['course'] ?>" data-date-absent="<?= $submission['date_absent'] ?>" data-remarks="<?= $submission['comment'] ?>" data-id="<?= $submission['id']?>">
-                                          <i class="fa-solid fa-check"></i>
-                                      </button>
-                                      <button class="notApp-button" data-bs-toggle="modal" data-bs-target="#approvalButtons" data-action="decline" data-name="<?=$submission['name']?>" data-course="<?= $submission['course'] ?>" data-date-absent="<?= $submission['date_absent'] ?>" data-remarks="<?= $submission['comment'] ?>" data-id="<?= $submission['id']?>">
-                                          <i class="fa-solid fa-x"></i>
-                                      </button>
-                                      </div>
-                                    </td>
-                                    <?php elseif ($submission['approval_type'] == "Approved"): ?>
-                                    <td>
-                                        <div class="approvalArea">
-                                            <div class="approved">Approved</div>
-                                        </div>
-                                    </td>
-                                    <?php elseif ($submission['approval_type'] == "Denied"): ?>
-                                    <td>
-                                        <div class="approvalArea">
-                                            <div class="disapproved">Denied</div>
-                                        </div>
-                                    </td>
-                                    <?php endif; ?>  
-                                </tr>
-                            <?php endif; ?>
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </tbody>
